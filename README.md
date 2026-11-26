@@ -1,10 +1,16 @@
-# Python PPT 开发项目
+# Python PPT Workbench
 
-本项目用 Python 和 `python-pptx` 生成可编辑演示稿。公共 Library 负责绘制与布局，Theme 提供默认设计参数，具体 PPT 的内容与项目覆盖配置留在本地业务目录。仓库内的组件示例可用于学习接口和检查视觉变化。
+用 Python 从源码生成可编辑的 PowerPoint。公共组件负责排版、表格和结构图；默认 Theme 提供统一的文字、颜色与间距，业务项目可以覆盖品牌参数并保留在本地。
 
-## 安装与验证
+![Component Showcase 逐页概览](docs/images/component-overview.png)
 
-需要 Python 3.11 或更新版本。在项目根目录运行：
+
+上图来自 [Component Showcase](slides/example/build.py) 的真实渲染。展示稿覆盖文字、表格、图标、图片、流程图、时间轴、甘特图和关系图 等。
+
+
+## Quick Start
+
+需要 Python 3.11 或更新版本。先用 `python3 --version` 确认版本；若低于 3.11，将下列命令中的 `python3` 换成已安装的较新版本。在项目根目录运行：
 
 ```bash
 python3 -m venv .venv
@@ -13,44 +19,37 @@ python3 -m venv .venv
 .venv/bin/python -m unittest discover -s code/tests -v
 ```
 
-示例源码位于 [`slides/example/build.py`](slides/example/build.py)，输出到同目录的 `component_showcase.pptx`。这里的可编辑安装只用于本地开发，不表示发布独立 Python Package。
+生成的 `slides/example/component_showcase.pptx` 可在 PowerPoint 中编辑；公共测试只使用公共代码和素材。这里的可编辑安装用于本地开发，不表示发布独立 Python Package。
 
-## 新建业务 PPT
+## 组件与 Design System
 
-1. 先与 AI 或团队成员讨论并确认需求、核心思路、内容大纲和逐页描述。
-2. 在 `slides/<项目名>/build.py` 编写页面内容和布局，调用 [公共组件](docs/components.md)；需要品牌变化时用 [Theme 覆盖](docs/design-system.md)。
-3. 业务图片放在 `assets/images/`，业务文档放在 `docs/projects/`，参考资料放在 `references/`。这些目录和新增的 `slides/<项目名>/` 默认不进入公共仓库。
-4. 从源码生成 PPTX，运行相关测试并逐页渲染检查，操作约定见 [Operations](docs/operations.md)。
+| 公共能力 | 用途 |
+| --- | --- |
+| Typography、Shape、Card、Footer | 建立清晰的页面层级和一致的信息卡样式。 |
+| Table、Icon、Image | 绘制可编辑表格，并嵌入本地图标与图片。 |
+| Framework、Flowchart、Timeline、Gantt、Relationship | 用原生形状组织结构和流程。 |
 
-公共项目可直接使用 `DEFAULT`：
+[`DEFAULT` Theme](code/themes/theme.py) 延续已有的科学编辑风格，项目可用 `DEFAULT.override(colors=..., layout=..., type_scale=...)` 覆盖必要参数。组件接口见[公共组件文档](docs/components.md)，视觉规则见[设计系统](docs/design-system.md)，可运行的调用方式见[示例源码](slides/example/build.py)。
 
-```python
-import sys
-from pathlib import Path
+## 推荐流程
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
+1. 先与 AI 或团队成员讨论受众、目标、核心思路、内容大纲和逐页描述，确认事实与素材。
+2. 将确认后的需求填入下方 Prompt，或提供本地需求文档路径。
+3. 在 `slides/<项目名>/build.py` 组织内容，调用公共组件；业务图片和品牌覆盖留在本地。
+4. 从源码生成 PPTX，逐页渲染检查文字、布局和事实，再交付 PPTX、源码及预览。
 
-from code.lib import Deck
-from code.themes import DEFAULT
+### Example Prompt
 
-theme = DEFAULT.override(colors={"green": "247F78", "dark": "143B40"})
-deck = Deck(theme, icon_dir=ROOT / "assets" / "icons", footer_label="YOUR DECK")
-slide = deck.base_slide("", "SECTION", "Slide title", "Supporting sentence")
-deck.card(slide, 0.55, 2.25, 3.8, 3.5, title="Card title", body="Card content", number="01")
-deck.save(Path(__file__).with_name("output.pptx"))
-```
-
-上例适用于 `slides/<项目名>/build.py`；更完整的入口见组件示例源码。已有素材中只有 `assets/icons/` 和 `assets/shared/` 是公共资源。业务项目可以保留自己的 Theme 覆盖和素材，不必复制公共 Library。
-
-## Example Prompt
-
-在使用前，将下面的占位符替换为已确认的需求：
-
-> 请基于当前项目的公共 Library、默认 Theme 和组件示例，设计并生成一份可编辑 PPT。先阅读 AGENTS.md 和 docs/00-index.md，复用公共组件；将业务内容和素材留在默认忽略的本地项目目录。生成后运行相关测试，逐页渲染检查，并按 AGENTS.md 汇报。
+> 请基于当前项目的公共 Library、默认 Theme 和 Component Showcase，设计并生成一份可编辑 PPT。先阅读 AGENTS.md 与 docs/00-index.md，复用现有组件；将业务内容和素材放在本地业务目录。生成后运行相关测试、逐页渲染检查，并说明使用的素材与待确认事项。
 >
 > {{请将已经讨论确认的 PPT 需求、核心思路、内容大纲、逐页描述及相关要求替换到这里。也可以提供对应的本地文档路径。}}
 
-## 共享边界
+## 项目文档与资产边界
 
-[`.gitignore`](.gitignore) 默认排除业务项目、业务图片、业务文档、参考资料、原型和生成结果。忽略规则不会移除已经被 Git 跟踪的文件，也不会清除历史提交；连接或发布仓库前，按 [共享检查步骤](docs/operations.md)核对跟踪状态与历史。
+[文档索引](docs/00-index.md)提供[架构](docs/architecture.md)、[设计系统](docs/design-system.md)、[组件](docs/components.md)和[操作指南](docs/operations.md)的入口。
+
+公共代码、`slides/example/build.py`、`assets/icons/` 和 `assets/shared/` 可作为共享项目使用。新的 `slides/<项目名>/`、`assets/images/`、`docs/projects/`、`references/` 与 `prototype/` 默认由 [`.gitignore`](.gitignore) 排除，供本地业务使用。忽略规则不会清除已经提交的文件；首次初始化或再次提交前，请按[共享检查步骤](docs/operations.md#git-共享检查)审阅待提交文件与历史。
+
+## 许可证
+
+仓库自身的代码目前没有声明开源许可证；对外开放复用前需要由项目所有者确定授权方式。随仓库保存的 Lucide SVG/PNG 图标涉及 ISC，部分源自 Feather 的图标还涉及 MIT；完整第三方许可见[图标许可文件](assets/icons/LICENSE)和[图标说明](assets/icons/README.md)。Python 依赖由安装命令单独获取。
