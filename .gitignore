@@ -1,0 +1,26 @@
+# Local business projects. New directories under slides/ stay private by default.
+/slides/*/
+!/slides/example/
+/slides/example/*.pptx
+/slides/example/*.zip
+/slides/example/preview/
+
+# Business assets, references, documents, and prototypes.
+/assets/images/
+/assets/logo/
+/references/
+/prototype/
+/docs/projects/
+/*.pdf
+
+# Generated files and local tooling.
+__pycache__/
+*.py[cod]
+*.egg-info/
+/build/
+/dist/
+/.venv/
+/.ruff_cache/
+/.DS_Store
+**/.DS_Store
+/.vscode/
